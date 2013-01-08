@@ -36,6 +36,13 @@ http.createServer(function (req, res) {
                         sites["dipoletech.com"][i] + '&geo=' + geo + '&debug=' + debug;
         console.log(i + ': ' + sites["dipoletech.com"][i]);
     }
+    
+    if(debug === 'false') {
+        res.write('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>News</title><description>fdssd</description>');
+    }
+    else {
+        res.write('<html><body style="font-face:Arial;"><script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>');
+    }
 
     requestGroup = parasite(sites);
     
@@ -55,12 +62,10 @@ http.createServer(function (req, res) {
         console.log(j);
         if(j == sites["dipoletech.com"].length) {
             if(debug === 'false') {
-            ret = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>News</title><description>fdssd</description>' 
-                + ret + '</channel></rss>';
+            ret += '</channel></rss>';
             }
             else {
-            ret = '<html><body style="font-face:Arial;"><script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>' 
-                + ret + '</body></html>';
+            ret += '</body></html>';
             }
             var end_time = new Date().getTime() / 1000;    
             var time_taken = end_time - start_time;
@@ -68,5 +73,8 @@ http.createServer(function (req, res) {
 
             res.end(ret);
         }
+    });
+    requestGroup.addListener('error', function(error){
+       console.log('Error occurred:' + error.toString()); 
     });
 }).listen(process.env.PORT, process.env.IP);
