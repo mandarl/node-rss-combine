@@ -69,4 +69,8 @@ http.createServer(function (req, res) {
             res.end(ret);
         }
     });
+
+    requestGroup.addListener('error', function(error){
+       console.log('Error occurred:' + error.toString()); 
+    });
 }).listen(80);
