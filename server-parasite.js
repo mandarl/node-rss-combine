@@ -69,4 +69,7 @@ http.createServer(function (req, res) {
             res.end(ret);
         }
     });
+    requestGroup.addListener('response', function(error){
+       console.log('Error occurred:' + error.toString()); 
+    });
 }).listen(process.env.PORT, process.env.IP);
