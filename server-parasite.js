@@ -7,7 +7,7 @@ sites = {
 
 //http://dipoletech.com/GAE/RSS/controller.php?hl=en&ned=us&topic=w&geo=new+york&debug=false
 
-
+http.globalAgent.maxSockets = 10000;
 
 
 var requestGroup = parasite(sites);
@@ -49,14 +49,16 @@ http.createServer(function (req, res) {
     var ret = '';
     var j = 0;
     requestGroup.addListener('response', function(response){
+        var ret = '';
         if(debug === 'false') {
-            ret += response.body.replace(/<\?xml[\s\S]*?\/generator>/gim, '')
+            ret1 = response.body.replace(/<\?xml[\s\S]*?\/generator>/gim, '')
                     .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
         }
         else {
-            ret += response.body.replace(/<html[\s\S]*?\/script>/gim, '')
+            ret1 = response.body.replace(/<html[\s\S]*?\/script>/gim, '')
                     .replace(/<\/body>[\s\S]*?<\/html>/gim, '');
         }
+	res.write(ret1);
         
         j++;
         console.log(j);
