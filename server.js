@@ -5,6 +5,7 @@ var topics = [ "l", "w", "t", "p", "b", "n", "e", "s", "m" ];
 
 //http://dipoletech.com/GAE/RSS/controller.php?hl=en&ned=us&topic=w&geo=new+york&debug=false
 http.globalAgent.maxSockets = 10000;
+http.Agent.defaultMaxSockets = 10000;
 
 http.createServer(function (req, res) {
     var start_time = new Date().getTime() / 1000;    
@@ -13,7 +14,7 @@ http.createServer(function (req, res) {
     
     var geo = 'new+york',
         ret = '',
-        debug = 'true';;
+        debug = 'true';
     if (queryData.geo) {
         geo = queryData.geo;
         geo = geo.replace(' ', '+');
@@ -39,12 +40,15 @@ http.createServer(function (req, res) {
         
         http.get(feed_url, function(resp) {
             resp.body = '';
+            resp.geo = this._header.match(/geo=(.*?)\&/)[1];
+            resp.topic = this._header.match(/topic=(.)/)[1];
+            resp.start_time = new Date().getTime() / 1000;
             resp.on('data', function (chunk) {
                 var tmp = '';
                 tmp = chunk.toString();
                 if(debug === 'false') {
                     chunk = tmp.replace(/<\?xml[\s\S]*?\/generator>/gim, '')
-                        .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');                    
+                        .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
                 }
                 else {
                     chunk = tmp.replace(/<html[\s\S]*?\/script>/gim, '')
@@ -53,14 +57,16 @@ http.createServer(function (req, res) {
                 resp.body += chunk;
             });
             resp.on('end', function (chunk) {
-                console.log("End: " + j);
-                ret += resp.body;
+                //console.log("End: " + j);
+                ret += resp.body.replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
+                resp.end_time = new Date().getTime() / 1000;
+                console.log(resp.geo + " Time: " + resp.topic + ": " + (resp.end_time - resp.start_time).toFixed(2));
                 j++;
                 if(j == topics.length) {
                     var end_time = new Date().getTime() / 1000;    
                     time_taken = end_time - start_time;
 		    var local_time = new Date(Date.now() - (8 * 3600000));
-                    console.log(local_time.toString() + " Time taken:" + time_taken);
+                    console.log(local_time.toString() + " Time taken:" + time_taken.toFixed(2));
                     if(debug === 'false')
                         res.end(ret + '</channel></rss>');
                     else
