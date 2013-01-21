@@ -55,11 +55,10 @@ http.createServer(function (req, res) {
                     .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
         }
         else {
-            ret1 += response.body.replace(/<html[\s\S]*?\/script>/gim, '')
+            ret1 = response.body.replace(/<html[\s\S]*?\/script>/gim, '')
                     .replace(/<\/body>[\s\S]*?<\/html>/gim, '');
         }
-        res.write(ret1);
-        
+	res.write(ret1);
         
         j++;
         console.log(j);
@@ -77,7 +76,8 @@ http.createServer(function (req, res) {
             res.end(ret);
         }
     });
+
     requestGroup.addListener('error', function(error){
        console.log('Error occurred:' + error.toString()); 
     });
-}).listen(process.env.PORT, process.env.IP);
+}).listen(80);

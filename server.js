@@ -1,7 +1,15 @@
 var http = require('http');
 var url = require('url');
+var IP = "0.0.0.0";
+var PORT = 80;
 
-var topics = [ "l", "w", "p", "b", "t", "n", "e", "s", "m" ];
+if(process.env.IP && process.env.PORT) {
+
+console.log(process.env.IP);
+	IP = process.env.IP;
+	PORT = process.env.PORT;
+} 
+var topics = { "l":Date.now(), "w":Date.now(), "t":Date.now(), "p":Date.now(), "b":Date.now(), "n":Date.now(), "e":Date.now(), "s":Date.now(), "m":Date.now() };
 
 //http://dipoletech.com/GAE/RSS/controller.php?hl=en&ned=us&topic=w&geo=new+york&debug=false
 http.globalAgent.maxSockets = 10000;
@@ -33,11 +41,12 @@ http.createServer(function (req, res) {
     }
     
     var j = 0;
-    for (var i = 0; i < topics.length; i++) {
+    for (var topic in topics) {
         var feed_url = 'http://dipoletech.com/GAE/RSS/controller.php?hl=en&ned=us&topic=' 
-                    + topics[i] + '&geo=' + geo + '&debug=' + debug;
-        console.log("Start: " + i + feed_url);
-
+                    + topic + '&geo=' + geo + '&debug=' + debug;
+        console.log("Start: " + topic + " " + feed_url);
+	topics[topic] = Date.now();
+        
         http.get(feed_url, function(resp) {
             resp.body = '';
             resp.geo = this._header.match(/geo=(.*?)\&/)[1];
@@ -48,7 +57,7 @@ http.createServer(function (req, res) {
                 tmp = chunk.toString();
                 if(debug === 'false') {
                     chunk = tmp.replace(/<\?xml[\s\S]*?\/generator>/gim, '')
-                        .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');                    
+                        .replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
                 }
                 else {
                     chunk = tmp.replace(/<html[\s\S]*?\/script>/gim, '')
@@ -57,14 +66,16 @@ http.createServer(function (req, res) {
                 resp.body += chunk;
             });
             resp.on('end', function (chunk) {
-                ret += resp.body;
+                //console.log("End: " + j);
+                ret += resp.body.replace(/<\/channel>[\s\S]*?<\/rss>/gim, '');
                 resp.end_time = new Date().getTime() / 1000;
-                console.log(resp.geo + " Time: " + resp.topic + ": " + (resp.end_time - resp.start_time));
+                console.log(resp.geo + " Time: " + resp.topic + ": " + (Date.now() - topics[resp.topic]));
                 j++;
-                if(j == topics.length) {
+                if(j == Object.keys(topics).length) {
                     var end_time = new Date().getTime() / 1000;    
                     time_taken = end_time - start_time;
-                    console.log("Time taken:" + time_taken);
+		    var local_time = new Date(Date.now() - (8 * 3600000));
+                    console.log(local_time.toString() + " Time taken:" + time_taken.toFixed(2));
                     if(debug === 'false')
                         res.end(ret + '</channel></rss>');
                     else
@@ -75,6 +86,6 @@ http.createServer(function (req, res) {
     }
     
     
+   
     
-    
-}).listen(process.env.PORT, process.env.IP);
+}).listen(PORT, IP);
