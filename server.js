@@ -4,8 +4,6 @@ var IP = "0.0.0.0";
 var PORT = 80;
 
 if(process.env.IP && process.env.PORT) {
-
-console.log(process.env.IP);
 	IP = process.env.IP;
 	PORT = process.env.PORT;
 } 
