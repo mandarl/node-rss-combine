@@ -85,10 +85,10 @@ ny.getArticles(function(articles) {
         console.log("Time1: " + (Date.now() - start_time));
         //console.log(articles);
 });
-setTimeout(function() {
+setInterval(function() {
+start_time = Date.now();
     ny.getArticles(function(articles) {
             console.log("done");
             console.log("Time2: " + (Date.now() - start_time));
-            process.exit(0);
     });
 }, 4000);
